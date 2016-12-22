@@ -17,6 +17,8 @@ limitations under the License.
 package main
 
 import (
+	"errors"
+
 	"github.com/turbinelabs/cli/command"
 )
 
@@ -32,10 +34,17 @@ type editRunner struct {
 
 func (gc *editRunner) run(svc typelessIface) error {
 	objstr, err := editOrStdin(
-		gc.cfg.key == "",
-		func() (interface{}, error) { return svc.Get(gc.cfg.key) },
+		func() (interface{}, error) {
+			if gc.cfg.key == "" {
+				return nil, errors.New("object key must be specified")
+			}
+			return svc.Get(gc.cfg.key)
+		},
 		gc.cfg.globalConfigT,
 	)
+	if err != nil {
+		return err
+	}
 
 	dest, err := svc.ObjFromString(objstr, gc.cfg.codec)
 	if err != nil {
@@ -71,7 +80,7 @@ func cmdEdit(cfg globalConfigT) *command.Cmd {
 		Name:        "edit",
 		Summary:     "edit an object from Turbine Labs API",
 		Usage:       "[OPTIONS] <object type>",
-		Description: "object type is one of: " + objTypeNames(),
+		Description: "object type is one of: " + objTypeNames() + "\n\n" + editingEditorHelp(),
 		Runner:      runner,
 	}
 

@@ -22,8 +22,6 @@ import (
 
 type createCfg struct {
 	*globalConfigT
-
-	useStdin bool
 }
 
 type createRunner struct {
@@ -32,7 +30,6 @@ type createRunner struct {
 
 func (gc *createRunner) run(svc typelessIface) error {
 	txt, err := editOrStdin(
-		gc.cfg.useStdin,
 		func() (interface{}, error) { return svc.Zero(), nil },
 		gc.cfg.globalConfigT,
 	)
@@ -73,17 +70,9 @@ func cmdCreate(cfg globalConfigT) *command.Cmd {
 		Name:        "create",
 		Summary:     "create an object within Turbine Labs API",
 		Usage:       "[OPTIONS] <object type>",
-		Description: "object type is one of: " + objTypeNames(),
+		Description: "object type is one of: " + objTypeNames() + "\n\n" + createEditorHelp(),
 		Runner:      runner,
 	}
-
-	cmd.Flags.BoolVar(
-		&runner.cfg.useStdin,
-		"stdin",
-		false,
-		`If this flag is set definition for the new object will be taken from
-stdin instead of opening an editor.`,
-	)
 
 	return cmd
 }

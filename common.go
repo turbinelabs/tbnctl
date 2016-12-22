@@ -59,6 +59,44 @@ func objTypeNames() string {
 	return strings.Join(desc, ", ")
 }
 
+func createEditorHelp() string {
+	return editorHelp("created")
+}
+
+func editingEditorHelp() string {
+	return editorHelp("edited")
+}
+
+func editorHelp(act string) string {
+	edtCmd, _, _ := editor.Get()
+	return fmt.Sprintf(`{{bold "Editor Selection"}}
+
+When changes need to be made an initial version of the object can be presented
+in an editor. The command used to launch the editor is taken from the %s
+environment variable and must block execution until the changes are saved and
+the editor is closed. The current editor command is '%s'.
+
+{{ul "Example EDITOR values"}}: 
+
+		vim
+
+		emacs
+
+		atom -w
+
+{{bold "Using STDIN"}}
+
+For scripting purposes it may be useful to use STDIN to provide the %s object
+instead of using an interactive editor. If so, simply make the new version
+available on STDIN through standard use of pipes.
+
+{{ul "Example"}}: cat "new_cluster.json" | tbnctl create cluster`,
+		editor.EditorVar,
+		edtCmd,
+		act,
+	)
+}
+
 // UntypedSvc examines command args and gets an untyped interface supporting
 // CRUD operations on one of the core objects underlying the Turbine Labs API.
 //
@@ -86,10 +124,12 @@ func (gc *globalConfigT) MkResult(obj interface{}, err error) error {
 		if eerr := gc.codec.Encode(err, os.Stdout); eerr != nil {
 			return eerr
 		}
+		fmt.Println()
 		return nil
 	}
 
 	if err := gc.codec.Encode(obj, os.Stdout); err != nil {
+		fmt.Println()
 		return err
 	}
 
@@ -98,37 +138,42 @@ func (gc *globalConfigT) MkResult(obj interface{}, err error) error {
 
 // editOrStdin is a helper function for commands that need to allow the user
 // to modify some text starting from an encoded object or use stdin. If stdin
-// is set then no object will be rendered and presented for modification.
+// has content then no object will be rendered and presented for modification.
 // Otherwise fallback will be called and the returned object will be rendered
 // using the codec available through gc and opened in an editor.
 func editOrStdin(
-	stdin bool,
 	fallback func() (interface{}, error),
 	gc *globalConfigT,
 ) (string, error) {
 	txt := ""
 
-	if stdin {
+	st, err := os.Stdin.Stat()
+	if err != nil {
+		return "", fmt.Errorf("could not process STDIN: %v", err.Error())
+	}
+
+	if st.Size() != 0 {
 		b, err := ioutil.ReadAll(os.Stdin)
 		if err != nil {
 			return "", err
 		}
 		txt = string(b)
-	} else {
-		obj, err := fallback()
-		if err != nil {
-			return "", err
-		}
+		return txt, nil
+	}
 
-		objstr, err := codec.EncodeToString(gc.codec, obj)
-		if err != nil {
-			return "", err
-		}
+	obj, err := fallback()
+	if err != nil {
+		return "", err
+	}
 
-		txt, err = editor.EditTextType(objstr, gc.codecFlags.Type())
-		if err != nil {
-			return "", err
-		}
+	objstr, err := codec.EncodeToString(gc.codec, obj)
+	if err != nil {
+		return "", err
+	}
+
+	txt, err = editor.EditTextType(objstr, gc.codecFlags.Type())
+	if err != nil {
+		return "", err
 	}
 
 	return txt, nil
