@@ -19,13 +19,13 @@ package main
 import (
 	"errors"
 	"fmt"
-	"io/ioutil"
 	"os"
 	"strings"
 
 	"github.com/turbinelabs/api/objecttype"
 	"github.com/turbinelabs/codec"
 	"github.com/turbinelabs/nonstdlib/editor"
+	tbnos "github.com/turbinelabs/nonstdlib/os"
 )
 
 var objTypeList = []objecttype.ObjectType{
@@ -76,7 +76,7 @@ in an editor. The command used to launch the editor is taken from the %s
 environment variable and must block execution until the changes are saved and
 the editor is closed. The current editor command is '%s'.
 
-{{ul "Example EDITOR values"}}: 
+{{ul "Example EDITOR values"}}:
 
 		vim
 
@@ -145,20 +145,9 @@ func editOrStdin(
 	fallback func() (interface{}, error),
 	gc *globalConfigT,
 ) (string, error) {
-	txt := ""
-
-	st, err := os.Stdin.Stat()
+	txt, err := tbnos.ReadIfNonEmpty(os.Stdin)
 	if err != nil {
-		return "", fmt.Errorf("could not process STDIN: %v", err.Error())
-	}
-
-	if st.Size() != 0 {
-		b, err := ioutil.ReadAll(os.Stdin)
-		if err != nil {
-			return "", err
-		}
-		txt = string(b)
-		return txt, nil
+		return "", fmt.Errorf("could not process STDIN: %s", err.Error())
 	}
 
 	obj, err := fallback()

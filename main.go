@@ -25,6 +25,8 @@ import (
 	"github.com/turbinelabs/codec"
 )
 
+const TbnPublicVersion = "0.0.1"
+
 type globalConfigT struct {
 	apiFlags   apiflag.ClientFromFlags
 	apiClient  *unifiedSvc
@@ -88,7 +90,7 @@ func main() {
 
 	app := cli.NewWithSubCmds(
 		"Command line tool for interacting with the Turbine Labs API",
-		"0.1",
+		TbnPublicVersion,
 		cmdGet(globalConfig),
 		cmdEdit(globalConfig),
 		cmdDelete(globalConfig),
