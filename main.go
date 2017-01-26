@@ -97,6 +97,7 @@ func main() {
 		cmdList(globalConfig),
 		cmdCreate(globalConfig),
 		cmdProxyConfig(globalConfig),
+		cmdInitZone(globalConfig),
 	)
 	app.SetFlags(gflags)
 

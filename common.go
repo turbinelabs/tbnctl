@@ -149,6 +149,9 @@ func editOrStdin(
 	if err != nil {
 		return "", fmt.Errorf("could not process STDIN: %s", err.Error())
 	}
+	if txt != "" {
+		return txt, nil
+	}
 
 	obj, err := fallback()
 	if err != nil {
