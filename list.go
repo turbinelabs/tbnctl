@@ -81,7 +81,7 @@ func init() {
 		for k := range fmts {
 			keys = append(keys, k)
 		}
-		preDefFormatName += fmt.Sprintf("{{bold \"%s\"}}: %s\n\n", ot, strings.Join(keys, ", "))
+		preDefFormatName += fmt.Sprintf("    - %s: %s\n", ot, strings.Join(keys, ", "))
 	}
 }
 
@@ -191,13 +191,39 @@ func cmdList(cfg globalConfigT) *command.Cmd {
 		"",
 		`<format name> or +<format string>
 
-Some pre-defined format strings may be refrenceed by {{ul "format name"}}; if
-set this will override the more general json/yaml format flag. If a custom
-format is desired it may be specified by prefixing the string with '+'. The
-available pre-defined formats vary based on the {{ul "object type"}} being
-listed:
+Some pre-defined format strings may be referenced by {{ul "format name"}}; if
+set this will override the more general json/yaml format flag. The available
+pre-defined formats vary based on the {{ul "object type"}} being listed:
 
-`+preDefFormatName,
+`+preDefFormatName+`
+
+If a custom format is desired it may be specified by prefixing the string with
+'+'. Custom formatting is defined using golang template syntax
+(see https://golang.org/pkg/text/template). For the field reference for specific
+API objects, see the API Godoc (https://godoc.org/github.com/turbinelabs/api).
+
+{{ul "EXAMPLE"}}:
+
+		> tbnctl --api.key=$TBN_API_KEY list \
+		  --format='+{{ "{{.Name}}{{range .Instances}}" }}
+		  {{ "{{.Host}}:{{.Port}}{{range .Metadata}}" }}
+		    {{ "{{.Key}}={{.Value}}{{end}}{{end}}'" }} cluster
+
+		local-demo-api-cluster
+		  127.0.0.1:8080
+		    stage=prod
+		    version=blue
+		  127.0.0.1:8081
+		    stage=prod
+		    version=green
+		  127.0.0.1:8082
+		    stage=dev
+		    version=yellow
+		local-demo-ui-cluster
+		  127.0.0.1:8083
+		    stage=prod
+
+`,
 	)
 
 	cmd.Flags.StringVar(

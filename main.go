@@ -91,11 +91,11 @@ func main() {
 	app := cli.NewWithSubCmds(
 		"Command line tool for interacting with the Turbine Labs API",
 		TbnPublicVersion,
+		cmdList(globalConfig),
 		cmdGet(globalConfig),
+		cmdCreate(globalConfig),
 		cmdEdit(globalConfig),
 		cmdDelete(globalConfig),
-		cmdList(globalConfig),
-		cmdCreate(globalConfig),
 		cmdProxyConfig(globalConfig),
 		cmdInitZone(globalConfig),
 	)

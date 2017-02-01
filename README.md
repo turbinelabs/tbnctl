@@ -1,49 +1,121 @@
-# Target Audience
 
-In not necessarily prioritized order:
+[//]: # ( Copyright 2017 Turbine Labs, Inc.                                   )
+[//]: # ( you may not use this file except in compliance with the License.    )
+[//]: # ( You may obtain a copy of the License at                             )
+[//]: # (                                                                     )
+[//]: # (     http://www.apache.org/licenses/LICENSE-2.0                      )
+[//]: # (                                                                     )
+[//]: # ( Unless required by applicable law or agreed to in writing, software )
+[//]: # ( distributed under the License is distributed on an "AS IS" BASIS,   )
+[//]: # ( WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or     )
+[//]: # ( implied. See the License for the specific language governing        )
+[//]: # ( permissions and limitations under the License.                      )
 
-* Turbine engineers
-* Turbine dev rel/implementation engineres
-* Turbine customers
+# turbinelabs/tbnctl
 
-# Use Cases
+[![Apache 2.0](https://img.shields.io/hexpm/l/plug.svg)](LICENSE)
+[![GoDoc](https://https://godoc.org/github.com/turbinelabs/tbnctl?status.svg)](https://https://godoc.org/github.com/turbinelabs/tbnctl)
+[![CircleCI](https://circleci.com/gh/turbinelabs/tbnctl.svg?style=shield)](https://circleci.com/gh/turbinelabs/tbnctl)
 
-In roughly prioritized order:
+The tbnctl project provides a command-line interface to the Turbine Labs public API.
 
-1. CRUD operations on core objects (zones, clusters, domains, shared rules, routes, proxies)
-2. Higher level operations
-  1. Initial environment setup
-  2. Execute the test workflow
-  3. Execute the release workflow
-3. Generate nginx config for a proxy
-4. Pull stats for a given object
+## Requirements
 
-# General Approach
+- Go 1.7.4 or later (previous versions may work, but we don't build or test against them)
 
-## CRUD operations
+## Dependencies
 
-Not to totally ape kubernetes, but I’ve been pretty happy with kubectl. Supporting the following kubectl commands makes sense:
+The tbnctl project depends on these packages:
 
-* get - gets a list of resources, e.g. `tbnctl get zones`. Equivalent to `GET <api>/v1.0/<object type>`
-* describe - gets details on a single resource, e.g. `tbnctl describe zone testbed`. Equivalent to `GET <api>/v1.0/<object type>/<object id>`
-* create - create a new resource from a file/flags, e.g. `tbnctl create zone testbed -f testbed.json`. Equivalent to `POST <api>/v1.0/<object type>`
-* edit - modify a resource, e.g. `tbnctl edit zone testbed`. Equivalent to `PUT <api>/v1.0/<object type>/<object id>`
-* delete - deletes a single resoucre, e.g. `tbnctl delete zone testbed`. Equvalent to `DELETE <api>/v1.0/<object type>/<object id>`
+- [api](https://github.com/turbinelabs/api)
+- [cli](https://github.com/turbinelabs/cli)
+- [codec](https://github.com/turbinelabs/codec)
+- [nonstdlib](https://github.com/turbinelabs/nonstdlib)
+- [tbnproxy](https://github.com/turbinelabs/tbnproxy)
 
-Most of these are pretty straightforward. Create and edit get a bit trickier since we need to provide more detailed JSON payloads. For create I think we just take a file as input. Extra credit for allowing all args to be specified on the command line. For edit, the kubectl trick of writing out a tmp file, popping open the editor and then posting back the edited content seems pretty safe though.
+The tests depend on our [test package](https://github.com/turbinelabs/test),
+and on [gomock](https://github.com/golang/mock). Some code is generated using
+[genny](http://github.com/falun/genny).
 
-In addition to these commands it would be cool to support describe, which spits out doc on a given object, e.g. tbnctl describe zone. I think we can generate all this from swagger. I think.
+It should always be safe to use HEAD of all master branches of Turbine Labs
+open source projects together, or to vendor them with the same git tag.
 
-## Initial environment setup
+## Install
 
-Even with CRUD operations supported there is still a somewhat tedious list of objects that need to be created to have a minimal functioning environment. Adding `tbnctl init <zone name>` should create the zone, a domain, a default cluster, a reasonable default shared rules, a proxy and a route.
+We plan to make `tbnctl` available via `brew`/`apt-get`/`yum`/etc in the future.
+For now you can build and install it from source:
 
-Executing the test and release workflows is likely a later step, although it might be useful to explore the UX via the CLI before we put a ton of effort into visual design.
+```
+go get -u github.com/turbinelabs/tbnctl
+go install github.com/turbinelabs/tbnctl
+```
 
-## Nginx config generation
+## Clone/Test
 
-For use case 2, generating an nginx config should also be pretty straightforward, something like `tbnctl getconfig <proxy>`.
+```
+mkdir -p $GOPATH/src/turbinelabs
+git clone https://github.com/turbinelabs/tbnctl.git > $GOPATH/src/turbinelabs/tbnctl
+go test github.com/turbinelabs/tbnctl/...
+```
 
-## Stats
+## Generated code
 
-Stats is probably trickier, and lower priority so probably doesn’t make a ton of sense to design here.
+Some code is generated using `go generate` and
+[genny](http://github.com/falun/genny). If you need to modify the generated
+code, modify [`adaptor.genny`](adaptor.genny), then:
+
+```
+go get -u github.com/falun/genny
+go install github.com/falun/genny
+go generate github.com/turbinelabs/tbnctl
+```
+
+## Versioning
+
+Please see [Versioning of Turbine Labs Open Source Projects](http://github.com/turbinelabs/developer/blob/master/README.md#versioning).
+
+## Pull Requests
+
+Patches accepted! Please see [Contributing to Turbine Labs Open Source Projects](http://github.com/turbinelabs/developer/blob/master/README.md#contributing).
+
+# Basic Usage
+
+Here we summarize what you can do with `tbnctl`. For more detailed help,
+run `tbnctl -h`.
+
+## CRUD Operations
+
+`tbnctl` supports the following operations on Clusters, Domains, Proxies,
+Routes, SharedRules, and Zones:
+
+- list
+- get
+- create
+- edit
+- delete
+
+Both `create` and `edit` will use the editor corresponding to the value of
+`EDITOR` in your environment.
+
+You can get detailed usage for each sub-command by typing `tbnctl help <cmd>`.
+
+## Initial Environment Setup
+
+The `init-zone` sub-command can be used to initialize a Zone with appropriate
+Clusters, Domains, Proxies, Routes, and SharedRules. See `tbnctl help init-zone`
+for more detail.
+
+## Proxy Configuration Dump
+
+The `proxy-config` sub-command can be used to produce the NGINX configuration for
+a named Proxy. See `tbnctl help proxy-config` for more detail.
+
+## A Look into... THE FUTURE
+
+We will continue to improve and extend `tbnctl` over time. Some examples of
+things we might someday add include:
+
+- parity with the web app for our the release workflow
+- access to the Stats API
+- better defaults when creating more complex objects (eg Routes, SharedRules)
+
