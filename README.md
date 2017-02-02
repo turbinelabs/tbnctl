@@ -123,5 +123,5 @@ things we might someday add include:
 
 - parity with the web app for our the release workflow
 - access to the Stats API
-- better defaults when creating more complex objects (eg Routes, SharedRules)
+- better defaults when creating more complex objects (e.g. Routes, SharedRules)
 
