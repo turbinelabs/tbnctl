@@ -25,7 +25,7 @@ import (
 	"github.com/turbinelabs/codec"
 )
 
-const TbnPublicVersion = "0.0.2"
+const TbnPublicVersion = "0.1.0"
 
 type globalConfigT struct {
 	apiFlags   apiflag.ClientFromFlags
