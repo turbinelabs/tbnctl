@@ -27,6 +27,15 @@ import (
 
 const TbnPublicVersion = "0.1.0"
 
+var cmds = []func(globalConfigT) *command.Cmd{
+	cmdList,
+	cmdGet,
+	cmdCreate,
+	cmdEdit,
+	cmdDelete,
+	cmdInitZone,
+}
+
 type globalConfigT struct {
 	apiFlags   apiflag.ClientFromFlags
 	apiClient  *unifiedSvc
@@ -88,16 +97,17 @@ func main() {
 	globalConfig.apiFlags = apiflag.NewClientFromFlags(gflags)
 	globalConfig.codecFlags = codec.NewFromFlags(gflags)
 
+	subs := []*command.Cmd{}
+	for _, mkCmd := range cmds {
+		subs = append(subs, mkCmd(globalConfig))
+	}
+
 	app := cli.NewWithSubCmds(
 		"Command line tool for interacting with the Turbine Labs API",
 		TbnPublicVersion,
-		cmdList(globalConfig),
-		cmdGet(globalConfig),
-		cmdCreate(globalConfig),
-		cmdEdit(globalConfig),
-		cmdDelete(globalConfig),
-		cmdProxyConfig(globalConfig),
-		cmdInitZone(globalConfig),
+		subs[0],
+		subs[1],
+		subs[2:]...,
 	)
 	app.SetFlags(gflags)
 
