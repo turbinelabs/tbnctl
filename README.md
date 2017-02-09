@@ -16,6 +16,7 @@
 [![Apache 2.0](https://img.shields.io/hexpm/l/plug.svg)](LICENSE)
 [![GoDoc](https://godoc.org/github.com/turbinelabs/tbnctl?status.svg)](https://godoc.org/github.com/turbinelabs/tbnctl)
 [![CircleCI](https://circleci.com/gh/turbinelabs/tbnctl.svg?style=shield)](https://circleci.com/gh/turbinelabs/tbnctl)
+[![Go Report Card](https://goreportcard.com/badge/github.com/turbinelabs/tbnctl)](https://goreportcard.com/report/github.com/turbinelabs/tbnctl)
 
 The tbnctl project provides a command-line interface to the Turbine Labs public API.
 
@@ -110,11 +111,6 @@ You can get detailed usage for each sub-command by typing `tbnctl help <cmd>`.
 The `init-zone` sub-command can be used to initialize a Zone with appropriate
 Clusters, Domains, Proxies, Routes, and SharedRules. See `tbnctl help init-zone`
 for more detail.
-
-## Proxy Configuration Dump
-
-The `proxy-config` sub-command can be used to produce the NGINX configuration for
-a named Proxy. See `tbnctl help proxy-config` for more detail.
 
 ## A Look into... THE FUTURE
 
