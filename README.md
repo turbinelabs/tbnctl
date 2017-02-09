@@ -14,7 +14,7 @@
 # turbinelabs/tbnctl
 
 [![Apache 2.0](https://img.shields.io/hexpm/l/plug.svg)](LICENSE)
-[![GoDoc](https://https://godoc.org/github.com/turbinelabs/tbnctl?status.svg)](https://https://godoc.org/github.com/turbinelabs/tbnctl)
+[![GoDoc](https://godoc.org/github.com/turbinelabs/tbnctl?status.svg)](https://godoc.org/github.com/turbinelabs/tbnctl)
 [![CircleCI](https://circleci.com/gh/turbinelabs/tbnctl.svg?style=shield)](https://circleci.com/gh/turbinelabs/tbnctl)
 
 The tbnctl project provides a command-line interface to the Turbine Labs public API.
