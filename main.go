@@ -25,7 +25,7 @@ import (
 	"github.com/turbinelabs/codec"
 )
 
-const TbnPublicVersion = "0.2.0"
+const TbnPublicVersion = "0.3.0"
 
 var cmds = []func(globalConfigT) *command.Cmd{
 	cmdList,
