@@ -18,7 +18,7 @@ package main
 
 import (
 	"github.com/turbinelabs/cli/command"
-	"github.com/turbinelabs/nonstdlib/flag"
+	tbnflag "github.com/turbinelabs/nonstdlib/flag"
 )
 
 type getCfg struct {
@@ -72,7 +72,7 @@ func cmdGet(cfg globalConfigT) *command.Cmd {
 		&runner.cfg.key,
 		"key",
 		"",
-		flag.Required("key of the object to retrieve"),
+		tbnflag.Required("key of the object to retrieve"),
 	)
 
 	return cmd

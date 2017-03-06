@@ -23,6 +23,7 @@ import (
 	"github.com/turbinelabs/cli"
 	"github.com/turbinelabs/cli/command"
 	"github.com/turbinelabs/codec"
+	tbnflag "github.com/turbinelabs/nonstdlib/flag"
 )
 
 const TbnPublicVersion = "0.4.1"
@@ -93,8 +94,8 @@ func (gc *globalConfigT) Make() error {
 func main() {
 	globalConfig := globalConfigT{}
 
-	gflags := &goflag.FlagSet{}
-	globalConfig.apiFlags = apiflag.NewClientFromFlags(gflags)
+	gflags := tbnflag.Wrap(&goflag.FlagSet{})
+	globalConfig.apiFlags = apiflag.NewClientFromFlags(gflags.Scope("api", "API"))
 	globalConfig.codecFlags = codec.NewFromFlags(gflags)
 
 	subs := []*command.Cmd{}
@@ -109,7 +110,7 @@ func main() {
 		subs[1],
 		subs[2:]...,
 	)
-	app.SetFlags(gflags)
+	app.SetFlags(gflags.Unwrap())
 
 	app.Main()
 }

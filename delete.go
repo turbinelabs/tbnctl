@@ -18,7 +18,7 @@ package main
 
 import (
 	"github.com/turbinelabs/cli/command"
-	"github.com/turbinelabs/nonstdlib/flag"
+	tbnflag "github.com/turbinelabs/nonstdlib/flag"
 )
 
 type delCfg struct {
@@ -75,7 +75,7 @@ func cmdDelete(cfg globalConfigT) *command.Cmd {
 		&runner.cfg.key,
 		"key",
 		"",
-		flag.Required("key of the object to delete"),
+		tbnflag.Required("key of the object to delete"),
 	)
 
 	return cmd
