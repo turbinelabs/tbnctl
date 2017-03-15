@@ -26,7 +26,7 @@ import (
 	tbnflag "github.com/turbinelabs/nonstdlib/flag"
 )
 
-const TbnPublicVersion = "0.5.0"
+const TbnPublicVersion = "0.6.0"
 
 var cmds = []func(globalConfigT) *command.Cmd{
 	cmdList,
