@@ -143,7 +143,7 @@ func (gc *listRunner) format(objs []interface{}, otype string) error {
 }
 
 func (gc *listRunner) run(cmd *command.Cmd, args []string) error {
-	svc, err := gc.cfg.UntypedSvc(args)
+	svc, err := gc.cfg.UntypedSvc(&args)
 	if err != nil {
 		return err
 	}

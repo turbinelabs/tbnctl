@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"os"
 	"strconv"
 	"strings"
 
@@ -11,6 +10,7 @@ import (
 	"github.com/turbinelabs/api/service"
 	"github.com/turbinelabs/cli/command"
 	tbnflag "github.com/turbinelabs/nonstdlib/flag"
+	"github.com/turbinelabs/nonstdlib/log/console"
 )
 
 const (
@@ -134,9 +134,9 @@ func (r *initZoneRunner) Run(cmd *command.Cmd, args []string) command.CmdErr {
 		return cmd.BadInput(err)
 	}
 
-	fmt.Fprintln(os.Stderr, "ZONE NAME: ", zoneName)
-	fmt.Fprintf(os.Stderr, "ROUTES: %+v\n", routes)
-	fmt.Fprintf(os.Stderr, "PROXIES: %+v\n", proxies)
+	console.Error().Println("ZONE NAME: ", zoneName)
+	console.Error().Printf("ROUTES: %+v\n", routes)
+	console.Error().Printf("PROXIES: %+v\n", proxies)
 
 	svc, err := r.apiFlags.Make()
 	if err != nil {
@@ -287,17 +287,17 @@ func addZone(zoneSvc service.Zone, name string) (api.ZoneKey, error) {
 	}
 
 	if len(zones) > 0 {
-		fmt.Fprintf(os.Stderr, "Zone %s already exists\n", name)
+		console.Error().Printf("Zone %s already exists\n", name)
 		return zones[0].ZoneKey, nil
 	}
 
-	fmt.Fprintf(os.Stderr, "Creating Zone %s\n", name)
+	console.Error().Printf("Creating Zone %s\n", name)
 	zone, err := zoneSvc.Create(api.Zone{Name: name})
 	if err != nil {
 		return "", err
 	}
 
-	fmt.Fprintf(os.Stderr, "Created Zone %s\n", name)
+	console.Error().Printf("Created Zone %s\n", name)
 	return zone.ZoneKey, nil
 }
 
@@ -315,16 +315,16 @@ func addDomain(svc service.Domain, zkey api.ZoneKey, hp hostPort) (api.DomainKey
 	}
 
 	if domain.DomainKey != "" {
-		fmt.Fprintf(os.Stderr, "Domain %s already exists\n", hp)
+		console.Error().Printf("Domain %s already exists\n", hp)
 		return domain.DomainKey, nil
 	}
 
-	fmt.Fprintf(os.Stderr, "Creating Domain %s\n", hp)
+	console.Error().Printf("Creating Domain %s\n", hp)
 	domain, err = svc.Create(api.Domain{Name: hp.host, Port: hp.port, ZoneKey: zkey})
 	if err != nil {
 		return "", err
 	}
-	fmt.Fprintf(os.Stderr, "Created Domain %s\n", hp)
+	console.Error().Printf("Created Domain %s\n", hp)
 	return domain.DomainKey, nil
 }
 
@@ -335,16 +335,16 @@ func addCluster(svc service.Cluster, zkey api.ZoneKey, name string) (api.Cluster
 	}
 
 	if len(cs) > 0 {
-		fmt.Fprintf(os.Stderr, "Cluster %s already exists\n", name)
+		console.Error().Printf("Cluster %s already exists\n", name)
 		return cs[0].ClusterKey, nil
 	}
 
-	fmt.Fprintf(os.Stderr, "Creating Cluster %s\n", name)
+	console.Error().Printf("Creating Cluster %s\n", name)
 	cluster, err := svc.Create(api.Cluster{Name: name, ZoneKey: zkey})
 	if err != nil {
 		return "", err
 	}
-	fmt.Fprintf(os.Stderr, "Created Cluster %s\n", name)
+	console.Error().Printf("Created Cluster %s\n", name)
 	return cluster.ClusterKey, nil
 }
 
@@ -376,7 +376,7 @@ func addSharedRules(
 	}
 
 	if len(srs) > 0 {
-		fmt.Fprintf(os.Stderr, "SharedRules %s already exists\n", name)
+		console.Error().Printf("SharedRules %s already exists\n", name)
 		if !replace {
 			return srs[0].SharedRulesKey, nil
 		}
@@ -384,17 +384,17 @@ func addSharedRules(
 		sr.Checksum = srs[0].Checksum
 		sr.SharedRulesKey = srs[0].SharedRulesKey
 
-		fmt.Fprintf(os.Stderr, "Modifying SharedRules %s\n", name)
+		console.Error().Printf("Modifying SharedRules %s\n", name)
 		if sr, err = svc.Modify(sr); err != nil {
 			return "", err
 		}
-		fmt.Fprintf(os.Stderr, "Modified SharedRules %s\n", name)
+		console.Error().Printf("Modified SharedRules %s\n", name)
 	} else {
-		fmt.Fprintf(os.Stderr, "Creating SharedRules %s\n", name)
+		console.Error().Printf("Creating SharedRules %s\n", name)
 		if sr, err = svc.Create(sr); err != nil {
 			return "", err
 		}
-		fmt.Fprintf(os.Stderr, "Created SharedRules %s\n", name)
+		console.Error().Printf("Created SharedRules %s\n", name)
 	}
 
 	return sr.SharedRulesKey, nil
@@ -459,7 +459,7 @@ func addRoutes(
 		route := api.Route{DomainKey: dkey, ZoneKey: zkey, Path: r.path, SharedRulesKey: srkey}
 
 		if len(rs) > 0 {
-			fmt.Fprintf(os.Stderr, "Route already exists for %s%s\n", r.domain, r.path)
+			console.Error().Printf("Route already exists for %s%s\n", r.domain, r.path)
 			if !replace {
 				continue
 			}
@@ -467,17 +467,17 @@ func addRoutes(
 			route.Checksum = rs[0].Checksum
 			route.RouteKey = rs[0].RouteKey
 
-			fmt.Fprintf(os.Stderr, "Modifying Route for %s%s to %s\n", r.domain, r.path, r.cluster)
+			console.Error().Printf("Modifying Route for %s%s to %s\n", r.domain, r.path, r.cluster)
 			if _, err = svc.Modify(route); err != nil {
 				return err
 			}
-			fmt.Fprintf(os.Stderr, "Modified Route for %s%s to %s\n", r.domain, r.path, r.cluster)
+			console.Error().Printf("Modified Route for %s%s to %s\n", r.domain, r.path, r.cluster)
 		} else {
-			fmt.Fprintf(os.Stderr, "Creating Route for %s%s to %s\n", r.domain, r.path, r.cluster)
+			console.Error().Printf("Creating Route for %s%s to %s\n", r.domain, r.path, r.cluster)
 			if _, err = svc.Create(route); err != nil {
 				return err
 			}
-			fmt.Fprintf(os.Stderr, "Created Route for %s%s to %s\n", r.domain, r.path, r.cluster)
+			console.Error().Printf("Created Route for %s%s to %s\n", r.domain, r.path, r.cluster)
 		}
 	}
 
@@ -497,7 +497,7 @@ func addProxies(
 			if dkey, ok := domainKeyMap[d.String()]; ok {
 				dkeys = append(dkeys, dkey)
 			} else {
-				fmt.Fprintf(os.Stderr, "Ignoring unknown domain %s for proxy %s\n", d, p.name)
+				console.Error().Printf("Ignoring unknown domain %s for proxy %s\n", d, p.name)
 			}
 		}
 
@@ -509,7 +509,7 @@ func addProxies(
 		proxy := api.Proxy{Name: p.name, DomainKeys: dkeys, ZoneKey: zkey}
 
 		if len(ps) > 0 {
-			fmt.Fprintf(os.Stderr, "Proxy %s already exists\n", p.name)
+			console.Error().Printf("Proxy %s already exists\n", p.name)
 			if !replace {
 				continue
 			}
@@ -517,17 +517,17 @@ func addProxies(
 			proxy.Checksum = ps[0].Checksum
 			proxy.ProxyKey = ps[0].ProxyKey
 
-			fmt.Fprintf(os.Stderr, "Modifying Proxy %s\n", p.name)
+			console.Error().Printf("Modifying Proxy %s\n", p.name)
 			if _, err = svc.Modify(proxy); err != nil {
 				return err
 			}
-			fmt.Fprintf(os.Stderr, "Modified Proxy %s\n", p.name)
+			console.Error().Printf("Modified Proxy %s\n", p.name)
 		} else {
-			fmt.Fprintf(os.Stderr, "Creating Proxy %s\n", p.name)
+			console.Error().Printf("Creating Proxy %s\n", p.name)
 			if _, err = svc.Create(proxy); err != nil {
 				return err
 			}
-			fmt.Fprintf(os.Stderr, "Created Proxy %s\n", p.name)
+			console.Error().Printf("Created Proxy %s\n", p.name)
 		}
 	}
 	return nil

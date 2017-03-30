@@ -32,6 +32,9 @@ type editRunner struct {
 	cfg *editCfg
 }
 
+func (c *editCfg) Key() string         { return c.key }
+func (c *editCfg) UpdateKey(nk string) { c.key = nk }
+
 func (gc *editRunner) run(svc typelessIface) error {
 	objstr, err := editOrStdin(
 		func() (interface{}, error) {
@@ -59,9 +62,13 @@ func (gc *editRunner) Run(cmd *command.Cmd, args []string) command.CmdErr {
 		return err
 	}
 
-	svc, err := gc.cfg.UntypedSvc(args)
+	svc, err := gc.cfg.UntypedSvc(&args)
 	if err != nil {
 		return cmd.Error(err)
+	}
+
+	if cerr := updateKeyed(cmd, &args, gc.cfg); cerr != command.NoError() {
+		return cerr
 	}
 
 	err = gc.run(svc)
@@ -79,7 +86,7 @@ func cmdEdit(cfg globalConfigT) *command.Cmd {
 	cmd := &command.Cmd{
 		Name:        "edit",
 		Summary:     "edit an object from Turbine Labs API",
-		Usage:       "[OPTIONS] <object type>",
+		Usage:       "[OPTIONS] <object type> [object key]",
 		Description: "object type is one of: " + objTypeNames() + "\n\n" + editingEditorHelp(),
 		Runner:      runner,
 	}
@@ -88,7 +95,7 @@ func cmdEdit(cfg globalConfigT) *command.Cmd {
 		&runner.cfg.key,
 		"key",
 		"",
-		"key of the object to retrieve, if not provided will read input from stdin",
+		"[deprecated] key of the object to retrieve, if not provided will read input from stdin",
 	)
 
 	return cmd

@@ -49,7 +49,7 @@ func (gc *createRunner) Run(cmd *command.Cmd, args []string) command.CmdErr {
 		return err
 	}
 
-	svc, err := gc.cfg.UntypedSvc(args)
+	svc, err := gc.cfg.UntypedSvc(&args)
 	if err != nil {
 		return cmd.Error(err)
 	}

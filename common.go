@@ -23,8 +23,10 @@ import (
 	"strings"
 
 	"github.com/turbinelabs/api/objecttype"
+	"github.com/turbinelabs/cli/command"
 	"github.com/turbinelabs/codec"
 	"github.com/turbinelabs/nonstdlib/editor"
+	"github.com/turbinelabs/nonstdlib/log/console"
 	tbnos "github.com/turbinelabs/nonstdlib/os"
 )
 
@@ -38,14 +40,58 @@ var objTypeList = []objecttype.ObjectType{
 	objecttype.Cluster,
 }
 
-func otFromStrings(args []string) (objecttype.ObjectType, error) {
-	if len(args) < 1 {
+type Keyed interface {
+	Key() string
+	UpdateKey(string)
+}
+
+func updateKeyed(cmd *command.Cmd, src *[]string, tgt Keyed) command.CmdErr {
+	if tgt.Key() != "" {
+		console.Error().Printf("Using deprecated -key flag\n")
+	}
+
+	if len(*src) > 0 {
+		key, err := objKeyFromStrings(src)
+		if err != nil {
+			return cmd.BadInput(err)
+		}
+
+		if tgt.Key() != "" {
+			console.Error().Printf("  overwriting -key flag with object key from argument\n")
+		}
+
+		tgt.UpdateKey(key)
+	}
+
+	if tgt.Key() == "" {
+		return cmd.BadInput(fmt.Errorf("expected object key, none found"))
+	}
+
+	return command.NoError()
+}
+
+func objKeyFromStrings(args *[]string) (string, error) {
+	if len(*args) < 1 {
+		return "", errors.New("expected object key missing")
+	}
+
+	key := (*args)[0]
+	*args = (*args)[1:]
+
+	return key, nil
+}
+
+func otFromStrings(args *[]string) (objecttype.ObjectType, error) {
+	if len(*args) < 1 {
 		return objecttype.ObjectType{}, errors.New("expected object type as first argument, got nothing")
 	}
-	ot, err := objecttype.FromName(args[0])
+
+	ot, err := objecttype.FromName((*args)[0])
 	if err != nil {
-		return objecttype.ObjectType{}, fmt.Errorf("%s was not a valid object type", args[0])
+		return objecttype.ObjectType{}, fmt.Errorf("%s was not a valid object type", (*args)[0])
 	}
+
+	*args = (*args)[1:]
 
 	return ot, nil
 }
@@ -101,7 +147,7 @@ available on STDIN through standard use of pipes.
 // CRUD operations on one of the core objects underlying the Turbine Labs API.
 //
 // If an untyped service is not available an error will be returned.
-func (gc *globalConfigT) UntypedSvc(args []string) (typelessIface, error) {
+func (gc *globalConfigT) UntypedSvc(args *[]string) (typelessIface, error) {
 	ot, err := otFromStrings(args)
 	if err != nil {
 		return nil, err
@@ -109,7 +155,7 @@ func (gc *globalConfigT) UntypedSvc(args []string) (typelessIface, error) {
 
 	svc := newTypelessIface(gc.apiClient, ot)
 	if svc == nil {
-		return nil, fmt.Errorf("Unsupported object type: %v\n", args[0])
+		return nil, fmt.Errorf("Unsupported object type: %v\n", (*args)[0])
 	}
 
 	return svc, nil

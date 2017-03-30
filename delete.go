@@ -18,7 +18,6 @@ package main
 
 import (
 	"github.com/turbinelabs/cli/command"
-	tbnflag "github.com/turbinelabs/nonstdlib/flag"
 )
 
 type delCfg struct {
@@ -27,23 +26,35 @@ type delCfg struct {
 	key string
 }
 
+func (dc *delCfg) Key() string         { return dc.key }
+func (dc *delCfg) UpdateKey(nk string) { dc.key = nk }
+
 type delRunner struct {
 	cfg *delCfg
 }
 
-func (gc *delRunner) run(cmd *command.Cmd, args []string) error {
-	svc, err := gc.cfg.UntypedSvc(args)
+func (gc *delRunner) run(cmd *command.Cmd, args []string) command.CmdErr {
+	svc, err := gc.cfg.UntypedSvc(&args)
 	if err != nil {
-		return err
+		return cmd.Error(err)
+	}
+
+	if cerr := updateKeyed(cmd, &args, gc.cfg); cerr != command.NoError() {
+		return cerr
 	}
 
 	obj, err := svc.Get(gc.cfg.key)
 	if err != nil {
-		return err
+		return cmd.Error(err)
 	}
 
 	e := svc.Delete(gc.cfg.key, svc.Checksum(obj))
-	return gc.cfg.MkResult(obj, e)
+	err = gc.cfg.MkResult(obj, e)
+	if err != nil {
+		return cmd.Error(err)
+	}
+
+	return command.NoError()
 }
 
 func (gc *delRunner) Run(cmd *command.Cmd, args []string) command.CmdErr {
@@ -51,12 +62,7 @@ func (gc *delRunner) Run(cmd *command.Cmd, args []string) command.CmdErr {
 		return err
 	}
 
-	err := gc.run(cmd, args)
-	if err != nil {
-		return cmd.Error(err)
-	}
-
-	return command.NoError()
+	return gc.run(cmd, args)
 }
 
 func cmdDelete(cfg globalConfigT) *command.Cmd {
@@ -66,7 +72,7 @@ func cmdDelete(cfg globalConfigT) *command.Cmd {
 	cmd := &command.Cmd{
 		Name:        "delete",
 		Summary:     "delete an object from Turbine Labs API",
-		Usage:       "[OPTIONS] <object type>",
+		Usage:       "[OPTIONS] <object type> <object key>",
 		Description: "object type is one of: " + objTypeNames(),
 		Runner:      runner,
 	}
@@ -75,7 +81,7 @@ func cmdDelete(cfg globalConfigT) *command.Cmd {
 		&runner.cfg.key,
 		"key",
 		"",
-		tbnflag.Required("key of the object to delete"),
+		"[deprecated] key of the object to delete",
 	)
 
 	return cmd
