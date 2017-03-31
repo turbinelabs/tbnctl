@@ -157,7 +157,7 @@ func (gc *listRunner) run(cmd *command.Cmd, args []string) error {
 		return err
 	}
 
-	return gc.format(objs, args[0])
+	return gc.format(objs, svc.Type().Name)
 }
 
 func (gc *listRunner) Run(cmd *command.Cmd, args []string) command.CmdErr {

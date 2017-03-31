@@ -155,7 +155,7 @@ func (gc *globalConfigT) UntypedSvc(args *[]string) (typelessIface, error) {
 
 	svc := newTypelessIface(gc.apiClient, ot)
 	if svc == nil {
-		return nil, fmt.Errorf("Unsupported object type: %v\n", (*args)[0])
+		return nil, fmt.Errorf("Unsupported object type: %v\n", ot.Name)
 	}
 
 	return svc, nil
