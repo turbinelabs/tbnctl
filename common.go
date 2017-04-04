@@ -46,10 +46,6 @@ type Keyed interface {
 }
 
 func updateKeyed(cmd *command.Cmd, src *[]string, tgt Keyed) command.CmdErr {
-	if tgt.Key() != "" {
-		console.Error().Printf("Using deprecated -key flag\n")
-	}
-
 	if len(*src) > 0 {
 		key, err := objKeyFromStrings(src)
 		if err != nil {
@@ -57,7 +53,7 @@ func updateKeyed(cmd *command.Cmd, src *[]string, tgt Keyed) command.CmdErr {
 		}
 
 		if tgt.Key() != "" {
-			console.Error().Printf("  overwriting -key flag with object key from argument\n")
+			console.Error().Printf("overwriting --key flag with object key from argument\n")
 		}
 
 		tgt.UpdateKey(key)

@@ -18,6 +18,7 @@ package main
 
 import (
 	"github.com/turbinelabs/cli/command"
+	"github.com/turbinelabs/nonstdlib/flag/usage"
 )
 
 type getCfg struct {
@@ -70,7 +71,7 @@ func cmdGet(cfg globalConfigT) *command.Cmd {
 		&runner.cfg.key,
 		"key",
 		"",
-		"[deprecated] key of the object to retrieve",
+		usage.Deprecated("key of the object to retrieve"),
 	)
 
 	return cmd
