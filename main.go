@@ -19,6 +19,7 @@ package main
 import (
 	goflag "flag"
 
+	apiclient "github.com/turbinelabs/api/client"
 	apiflag "github.com/turbinelabs/api/client/flags"
 	"github.com/turbinelabs/cli"
 	"github.com/turbinelabs/cli/command"
@@ -27,6 +28,8 @@ import (
 )
 
 const TbnPublicVersion = "0.6.1"
+
+const clientApp = apiclient.App("github.com/turbinelabs/tbnctl")
 
 var cmds = []func(globalConfigT) *command.Cmd{
 	cmdList,
@@ -95,7 +98,7 @@ func main() {
 	globalConfig := globalConfigT{}
 
 	gflags := tbnflag.Wrap(&goflag.FlagSet{})
-	globalConfig.apiFlags = apiflag.NewClientFromFlags(gflags.Scope("api", "API"))
+	globalConfig.apiFlags = apiflag.NewClientFromFlags(clientApp, gflags.Scope("api", "API"))
 	globalConfig.codecFlags = codec.NewFromFlags(gflags)
 
 	subs := []*command.Cmd{}
