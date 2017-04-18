@@ -80,7 +80,11 @@ func TestParseRoute(t *testing.T) {
 		},
 		{
 			in:     "example.com:80=",
-			errStr: `empty cluster name in route argument "example.com:80="`,
+			errStr: `malformed route "example.com:80="`,
+		},
+		{
+			in:     "example.com:80=:nocluster",
+			errStr: `empty cluster name in route argument "example.com:80=:nocluster"`,
 		},
 		{
 			in:     "example.com=exampleService",
@@ -88,11 +92,7 @@ func TestParseRoute(t *testing.T) {
 		},
 		{
 			in:     "example.com:blegga=exampleService",
-			errStr: `malformed port "blegga" in route argument "example.com:blegga=exampleService"`,
-		},
-		{
-			in:     "api.example.com:443/api/users=userService:stage=prod:version",
-			errStr: `malformed metadata "version" in route argument "api.example.com:443/api/users=userService:stage=prod:version"`,
+			errStr: `malformed domain/port "example.com:blegga" in route argument "example.com:blegga=exampleService"`,
 		},
 		{
 			in:     "api.example.com:443/api/users=userService:stage=prod:",
@@ -101,6 +101,10 @@ func TestParseRoute(t *testing.T) {
 		{
 			in:     "api.example.com:443/api/users=userService:",
 			errStr: `malformed metadata "" in route argument "api.example.com:443/api/users=userService:"`,
+		},
+		{
+			in:     "api.example.com:443/api/users=userService:=missingkey",
+			errStr: `malformed metadata "=missingkey" in route argument "api.example.com:443/api/users=userService:=missingkey"`,
 		},
 		{
 			in: "example.com:80=exampleService",
@@ -145,6 +149,18 @@ func TestParseRoute(t *testing.T) {
 		},
 		{
 			in: "api.example.com:443/api/users=userService:stage=prod:version=",
+			route: route{
+				domain:  hostPort{"api.example.com", 443},
+				path:    "/api/users",
+				cluster: "userService",
+				metadata: api.Metadata{
+					api.Metadatum{"stage", "prod"},
+					api.Metadatum{"version", ""},
+				},
+			},
+		},
+		{
+			in: "api.example.com:443/api/users=userService:stage=prod:version",
 			route: route{
 				domain:  hostPort{"api.example.com", 443},
 				path:    "/api/users",

@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"strconv"
 	"strings"
 
 	"github.com/turbinelabs/api"
@@ -11,6 +10,7 @@ import (
 	"github.com/turbinelabs/cli/command"
 	tbnflag "github.com/turbinelabs/nonstdlib/flag"
 	"github.com/turbinelabs/nonstdlib/log/console"
+	tbnstrings "github.com/turbinelabs/nonstdlib/strings"
 )
 
 const (
@@ -177,21 +177,14 @@ func parseProxies(strs []string) ([]proxy, error) {
 }
 
 func parseProxy(str string) (proxy, error) {
-	pair := strings.Split(str, "=")
-	if len(pair) != 2 {
+	proxyName, domainHostPort := tbnstrings.SplitFirstEqual(str)
+	if proxyName == "" || domainHostPort == "" {
 		return proxy{}, fmt.Errorf("malformed proxy argument: %q", str)
 	}
-	proxyName := pair[0]
 
-	domainPair := strings.Split(pair[1], ":")
-	if len(domainPair) != 2 {
-		return proxy{}, fmt.Errorf("malformed domain/port %q in proxy argument %q", pair[0], str)
-	}
-	domain := domainPair[0]
-
-	port, err := strconv.Atoi(domainPair[1])
+	domain, port, err := tbnstrings.SplitHostPort(domainHostPort)
 	if err != nil {
-		return proxy{}, fmt.Errorf("malformed port %q in proxy argument %q", domainPair[1], str)
+		return proxy{}, fmt.Errorf("malformed domain/port %q in proxy argument %q", domainHostPort, str)
 	}
 
 	return proxy{proxyName, []hostPort{{domain, port}}}, nil
@@ -228,29 +221,24 @@ func parseRoutes(strs []string) ([]route, error) {
 }
 
 func parseRoute(str string) (route, error) {
-	pair := strings.SplitN(str, "=", 2)
-	if len(pair) != 2 {
+	domainHostPortPath, clusterAndMetaDef := tbnstrings.SplitFirstEqual(str)
+	if domainHostPortPath == "" || clusterAndMetaDef == "" {
 		return route{}, fmt.Errorf("malformed route %q", str)
 	}
 
-	domainPair := strings.Split(pair[0], ":")
-	if len(domainPair) != 2 {
-		return route{}, fmt.Errorf("malformed domain/port %q in route argument %q", pair[0], str)
-	}
-	domain := domainPair[0]
+	domainHostPort, pathDef := tbnstrings.Split2(domainHostPortPath, "/")
 
-	portPathPair := strings.SplitN(domainPair[1], "/", 2)
-	port, err := strconv.Atoi(portPathPair[0])
+	domain, port, err := tbnstrings.SplitHostPort(domainHostPort)
 	if err != nil {
-		return route{}, fmt.Errorf("malformed port %q in route argument %q", domainPair[1], str)
+		return route{}, fmt.Errorf("malformed domain/port %q in route argument %q", domainHostPort, str)
 	}
 
 	path := "/"
-	if len(portPathPair) == 2 {
-		path = "/" + portPathPair[1]
+	if pathDef != "" {
+		path = "/" + pathDef
 	}
 
-	clusterAndMeta := strings.Split(pair[1], ":")
+	clusterAndMeta := strings.Split(clusterAndMetaDef, ":")
 	cluster := clusterAndMeta[0]
 	if cluster == "" {
 		return route{}, fmt.Errorf("empty cluster name in route argument %q", str)
@@ -258,11 +246,11 @@ func parseRoute(str string) (route, error) {
 
 	metadata := api.Metadata{}
 	for _, kv := range clusterAndMeta[1:] {
-		kvPair := strings.SplitN(kv, "=", 2)
-		if len(kvPair) != 2 {
+		key, value := tbnstrings.SplitFirstEqual(kv)
+		if key == "" {
 			return route{}, fmt.Errorf("malformed metadata %q in route argument %q", kv, str)
 		}
-		metadata = append(metadata, api.Metadatum{kvPair[0], kvPair[1]})
+		metadata = append(metadata, api.Metadatum{key, value})
 	}
 
 	return route{hostPort{domain, port}, cluster, path, metadata}, nil
