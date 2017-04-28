@@ -110,8 +110,7 @@ func main() {
 		"Command line tool for interacting with the Turbine Labs API",
 		TbnPublicVersion,
 		subs[0],
-		subs[1],
-		subs[2:]...,
+		subs[1:]...,
 	)
 	app.SetFlags(gflags.Unwrap())
 
