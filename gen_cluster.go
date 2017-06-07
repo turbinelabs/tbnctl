@@ -11,9 +11,7 @@ import (
 	"github.com/turbinelabs/api/objecttype"
 	"github.com/turbinelabs/api/service"
 	"github.com/turbinelabs/codec"
-)
-
-/*
+) /*
 Copyright 2017 Turbine Labs, Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -55,8 +53,19 @@ func (a clusterAdapter) Delete(k string, cs api.Checksum) error {
 	return a.Cluster.Delete(api.ClusterKey(k), cs)
 }
 
+func (a clusterAdapter) IndexZeroFilter() interface{} {
+	return service.ClusterFilter{}
+}
+
 func (a clusterAdapter) Index() ([]interface{}, error) {
-	objs, err := a.Cluster.Index()
+	return a.FilteredIndex("", nil)
+}
+
+func (a clusterAdapter) FilteredIndex(sliceSep string, attr map[string]string) ([]interface{}, error) {
+	f := service.ClusterFilter{}
+	populateFilter(&f, attr, sliceSep)
+
+	objs, err := a.Cluster.Index(f)
 	if err != nil {
 		return nil, err
 	}

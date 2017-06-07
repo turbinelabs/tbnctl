@@ -11,9 +11,7 @@ import (
 	"github.com/turbinelabs/api/objecttype"
 	"github.com/turbinelabs/api/service"
 	"github.com/turbinelabs/codec"
-)
-
-/*
+) /*
 Copyright 2017 Turbine Labs, Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -55,8 +53,19 @@ func (a userAdapter) Delete(k string, cs api.Checksum) error {
 	return a.User.Delete(api.UserKey(k), cs)
 }
 
+func (a userAdapter) IndexZeroFilter() interface{} {
+	return service.UserFilter{}
+}
+
 func (a userAdapter) Index() ([]interface{}, error) {
-	objs, err := a.User.Index()
+	return a.FilteredIndex("", nil)
+}
+
+func (a userAdapter) FilteredIndex(sliceSep string, attr map[string]string) ([]interface{}, error) {
+	f := service.UserFilter{}
+	populateFilter(&f, attr, sliceSep)
+
+	objs, err := a.User.Index(f)
 	if err != nil {
 		return nil, err
 	}

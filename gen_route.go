@@ -11,9 +11,7 @@ import (
 	"github.com/turbinelabs/api/objecttype"
 	"github.com/turbinelabs/api/service"
 	"github.com/turbinelabs/codec"
-)
-
-/*
+) /*
 Copyright 2017 Turbine Labs, Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -55,8 +53,19 @@ func (a routeAdapter) Delete(k string, cs api.Checksum) error {
 	return a.Route.Delete(api.RouteKey(k), cs)
 }
 
+func (a routeAdapter) IndexZeroFilter() interface{} {
+	return service.RouteFilter{}
+}
+
 func (a routeAdapter) Index() ([]interface{}, error) {
-	objs, err := a.Route.Index()
+	return a.FilteredIndex("", nil)
+}
+
+func (a routeAdapter) FilteredIndex(sliceSep string, attr map[string]string) ([]interface{}, error) {
+	f := service.RouteFilter{}
+	populateFilter(&f, attr, sliceSep)
+
+	objs, err := a.Route.Index(f)
 	if err != nil {
 		return nil, err
 	}

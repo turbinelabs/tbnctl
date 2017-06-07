@@ -1,4 +1,3 @@
-
 /*
 Copyright 2017 Turbine Labs, Inc.
 
@@ -15,11 +14,11 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-
 package main
 
 import (
 	"bytes"
+	"errors"
 
 	"github.com/turbinelabs/api"
 	"github.com/turbinelabs/api/objecttype"
@@ -53,8 +52,19 @@ func (a __type__Adapter) Delete(k string, cs api.Checksum) error {
 	return a.__Type__.Delete(api.__Type__Key(k), cs)
 }
 
+func (a __type__Adapter) IndexZeroFilter() interface{} {
+	return service.__Type__Filter{}
+}
+
 func (a __type__Adapter) Index() ([]interface{}, error) {
-	objs, err := a.__Type__.Index()
+	return a.FilteredIndex("", nil)
+}
+
+func (a __type__Adapter) FilteredIndex(sliceSep string, attr map[string]string) ([]interface{}, error) {
+	f := service.__Type__Filter{}
+	populateFilter(&f, attr, sliceSep)
+
+	objs, err := a.__Type__.Index(f)
 	if err != nil {
 		return nil, err
 	}

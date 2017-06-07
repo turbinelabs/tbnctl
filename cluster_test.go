@@ -107,7 +107,7 @@ func TestIndex(t *testing.T) {
 	c1 := api.Cluster{Name: "c1"}
 	c2 := api.Cluster{Name: "c2"}
 
-	m.EXPECT().Index().Return([]api.Cluster{c1, c2}, nil)
+	m.EXPECT().Index(service.ClusterFilter{}).Return([]api.Cluster{c1, c2}, nil)
 	got, gotErr := a.Index()
 
 	assert.Nil(t, gotErr)
@@ -118,8 +118,19 @@ func TestIndexErr(t *testing.T) {
 	a, m, fin := mkAdapter(t)
 	defer fin()
 
-	m.EXPECT().Index().Return([]api.Cluster{{}, {}, {}}, ex)
+	m.EXPECT().Index(service.ClusterFilter{}).Return([]api.Cluster{{}, {}, {}}, ex)
 	got, gotErr := a.Index()
+
+	assert.Nil(t, got)
+	assert.Equal(t, gotErr, ex)
+}
+
+func TestFilteredIndex(t *testing.T) {
+	a, m, fin := mkAdapter(t)
+	defer fin()
+
+	m.EXPECT().Index(service.ClusterFilter{Name: "bob"}).Return([]api.Cluster{{}, {}, {}}, ex)
+	got, gotErr := a.FilteredIndex(",", map[string]string{"name": "bob"})
 
 	assert.Nil(t, got)
 	assert.Equal(t, gotErr, ex)

@@ -11,9 +11,7 @@ import (
 	"github.com/turbinelabs/api/objecttype"
 	"github.com/turbinelabs/api/service"
 	"github.com/turbinelabs/codec"
-)
-
-/*
+) /*
 Copyright 2017 Turbine Labs, Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -55,8 +53,19 @@ func (a sharedrulesAdapter) Delete(k string, cs api.Checksum) error {
 	return a.SharedRules.Delete(api.SharedRulesKey(k), cs)
 }
 
+func (a sharedrulesAdapter) IndexZeroFilter() interface{} {
+	return service.SharedRulesFilter{}
+}
+
 func (a sharedrulesAdapter) Index() ([]interface{}, error) {
-	objs, err := a.SharedRules.Index()
+	return a.FilteredIndex("", nil)
+}
+
+func (a sharedrulesAdapter) FilteredIndex(sliceSep string, attr map[string]string) ([]interface{}, error) {
+	f := service.SharedRulesFilter{}
+	populateFilter(&f, attr, sliceSep)
+
+	objs, err := a.SharedRules.Index(f)
 	if err != nil {
 		return nil, err
 	}

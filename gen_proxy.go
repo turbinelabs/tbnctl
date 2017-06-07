@@ -11,9 +11,7 @@ import (
 	"github.com/turbinelabs/api/objecttype"
 	"github.com/turbinelabs/api/service"
 	"github.com/turbinelabs/codec"
-)
-
-/*
+) /*
 Copyright 2017 Turbine Labs, Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -55,8 +53,19 @@ func (a proxyAdapter) Delete(k string, cs api.Checksum) error {
 	return a.Proxy.Delete(api.ProxyKey(k), cs)
 }
 
+func (a proxyAdapter) IndexZeroFilter() interface{} {
+	return service.ProxyFilter{}
+}
+
 func (a proxyAdapter) Index() ([]interface{}, error) {
-	objs, err := a.Proxy.Index()
+	return a.FilteredIndex("", nil)
+}
+
+func (a proxyAdapter) FilteredIndex(sliceSep string, attr map[string]string) ([]interface{}, error) {
+	f := service.ProxyFilter{}
+	populateFilter(&f, attr, sliceSep)
+
+	objs, err := a.Proxy.Index(f)
 	if err != nil {
 		return nil, err
 	}

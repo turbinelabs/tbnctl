@@ -25,13 +25,17 @@ import (
 
 	"github.com/turbinelabs/api/objecttype"
 	"github.com/turbinelabs/cli/command"
+	tbnstrings "github.com/turbinelabs/nonstdlib/strings"
+	tbntabwriter "github.com/turbinelabs/nonstdlib/text/tabwriter"
 )
 
 type listCfg struct {
 	*globalConfigT
 
-	fmt       string
-	fmtHeader string
+	fmt              string
+	fmtHeader        string
+	showFilterFields bool
+	sliceSep         string
 }
 
 type listRunner struct {
@@ -142,13 +146,39 @@ func (gc *listRunner) format(objs []interface{}, otype string) error {
 	return nil
 }
 
+func argsToAttrs(args []string) map[string]string {
+	attr := map[string]string{}
+	for _, kv := range args {
+		k, v := tbnstrings.SplitFirstEqual(kv)
+		attr[k] = v
+	}
+	return attr
+}
+
+func displayFilterFields(f interface{}, m map[string]string) {
+	fmt.Printf("Listing results may be filtered by setting attributes of a %T\n", f)
+	fmt.Printf("\nThe filterable attribute names and their types:\n")
+	str := ""
+	for k, v := range m {
+		str += k + "\t" + v + "\n"
+	}
+	fmt.Println(
+		tbnstrings.PadLeft(tbntabwriter.FormatWithHeader("NAME\tTYPE", str), 4))
+}
+
 func (gc *listRunner) run(cmd *command.Cmd, args []string) error {
 	svc, err := gc.cfg.UntypedSvc(&args)
 	if err != nil {
 		return err
 	}
 
-	objs, err := svc.Index()
+	if gc.cfg.showFilterFields {
+		f := svc.IndexZeroFilter()
+		displayFilterFields(f, describeFields(f))
+		return nil
+	}
+
+	objs, err := svc.FilteredIndex(gc.cfg.sliceSep, argsToAttrs(args))
 	if gc.cfg.fmt == "" {
 		return gc.cfg.MkResult(objs, err)
 	}
@@ -180,10 +210,27 @@ func cmdList(cfg globalConfigT) *command.Cmd {
 	cmd := &command.Cmd{
 		Name:        "list",
 		Summary:     "list all of a particular object in the Turbine Labs API",
-		Usage:       "[OPTIONS] <object type>",
+		Usage:       "[OPTIONS] <object type> [field_name=field_value]...",
 		Description: "object type is one of: " + objTypeNames(),
 		Runner:      runner,
 	}
+
+	cmd.Flags.BoolVar(&runner.cfg.showFilterFields, "show-filter-fields", false, `Displays
+attributes that can be filtered when listing an object type. Each field is
+specified as a single argument of the format name=value.
+
+If an attribute expects a slice of values they may be specified as a comma-separated
+string (if commas are needed in the values see {{ul "filter-slice-separator"}}). If the
+attribute is a time then it should be specified as the number of milliseconds since the
+unix epoch. Boolean true values may be represented by true, t, yes, y, or 1, and is case
+insensitive.`)
+
+	cmd.Flags.StringVar(
+		&runner.cfg.sliceSep,
+		"filter-slice-separator",
+		",",
+		`sets the delimiter used to indicate the boundary between elements when passing
+a list of values into a filter attribute that expects a slice.`)
 
 	cmd.Flags.StringVar(
 		&runner.cfg.fmt,

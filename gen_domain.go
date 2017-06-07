@@ -11,9 +11,7 @@ import (
 	"github.com/turbinelabs/api/objecttype"
 	"github.com/turbinelabs/api/service"
 	"github.com/turbinelabs/codec"
-)
-
-/*
+) /*
 Copyright 2017 Turbine Labs, Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -55,8 +53,19 @@ func (a domainAdapter) Delete(k string, cs api.Checksum) error {
 	return a.Domain.Delete(api.DomainKey(k), cs)
 }
 
+func (a domainAdapter) IndexZeroFilter() interface{} {
+	return service.DomainFilter{}
+}
+
 func (a domainAdapter) Index() ([]interface{}, error) {
-	objs, err := a.Domain.Index()
+	return a.FilteredIndex("", nil)
+}
+
+func (a domainAdapter) FilteredIndex(sliceSep string, attr map[string]string) ([]interface{}, error) {
+	f := service.DomainFilter{}
+	populateFilter(&f, attr, sliceSep)
+
+	objs, err := a.Domain.Index(f)
 	if err != nil {
 		return nil, err
 	}

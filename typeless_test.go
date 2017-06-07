@@ -18,11 +18,14 @@ package main
 
 import (
 	"testing"
+	"time"
 
 	"github.com/golang/mock/gomock"
 
 	"github.com/turbinelabs/api/objecttype"
 	"github.com/turbinelabs/api/service"
+	"github.com/turbinelabs/nonstdlib/ptr"
+	tbntime "github.com/turbinelabs/nonstdlib/time"
 	"github.com/turbinelabs/test/assert"
 )
 
@@ -106,4 +109,87 @@ func TestNewTypelessIface(t *testing.T) {
 
 type testadapter interface {
 	underlying() interface{}
+}
+
+func TestDescribeFields(t *testing.T) {
+	type test struct {
+		I    int
+		Is   []int
+		S    string
+		Ss   []string
+		T    time.Time
+		Tp   *time.Time
+		I64  int64
+		I64p *int64
+	}
+
+	got := describeFields(test{})
+	assert.DeepEqual(t, got, map[string]string{
+		"I":    "int",
+		"Is":   "slice<int>",
+		"S":    "string",
+		"Ss":   "slice<string>",
+		"T":    "time (milliseconds since Unix epoch)",
+		"Tp":   "time (milliseconds since Unix epoch)",
+		"I64":  "int64",
+		"I64p": "int64",
+	})
+}
+
+func TestPopulateFilter(t *testing.T) {
+	type dest struct {
+		I     int
+		S     string
+		F     float32
+		B     bool
+		Is    []int
+		Ss    []string
+		Bs    []bool
+		Ip    *int
+		I32ps []*int32
+		Sp    *string
+		Fp    *float64
+		Bp    *bool
+		T     time.Time
+		Tp    *time.Time
+	}
+
+	attrs := map[string]string{
+		"I":     "1234",
+		"S":     "some string",
+		"F":     "3e10",
+		"B":     "y",
+		"Is":    "1,2,3,4",
+		"Ss":    "one,two,three,four",
+		"Bs":    "yes,no,0,true,false",
+		"Ip":    "1234",
+		"I32ps": "1,2,3,4",
+		"Sp":    "test string",
+		"Fp":    "40.0",
+		"Bp":    "false",
+		"T":     "10000",
+		"Tp":    "1000",
+	}
+
+	got := dest{}
+	populateFilter(&got, attrs, ",")
+
+	want := dest{
+		1234,
+		"some string",
+		30000000000,
+		true,
+		[]int{1, 2, 3, 4},
+		[]string{"one", "two", "three", "four"},
+		[]bool{true, false, false, true, false},
+		ptr.Int(1234),
+		[]*int32{ptr.Int32(1), ptr.Int32(2), ptr.Int32(3), ptr.Int32(4)},
+		ptr.String("test string"),
+		ptr.Float64(40),
+		ptr.Bool(false),
+		tbntime.FromUnixMilli(10000),
+		ptr.Time(tbntime.FromUnixMilli(1000)),
+	}
+
+	assert.DeepEqual(t, got, want)
 }

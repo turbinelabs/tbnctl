@@ -11,9 +11,7 @@ import (
 	"github.com/turbinelabs/api/objecttype"
 	"github.com/turbinelabs/api/service"
 	"github.com/turbinelabs/codec"
-)
-
-/*
+) /*
 Copyright 2017 Turbine Labs, Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -55,8 +53,19 @@ func (a zoneAdapter) Delete(k string, cs api.Checksum) error {
 	return a.Zone.Delete(api.ZoneKey(k), cs)
 }
 
+func (a zoneAdapter) IndexZeroFilter() interface{} {
+	return service.ZoneFilter{}
+}
+
 func (a zoneAdapter) Index() ([]interface{}, error) {
-	objs, err := a.Zone.Index()
+	return a.FilteredIndex("", nil)
+}
+
+func (a zoneAdapter) FilteredIndex(sliceSep string, attr map[string]string) ([]interface{}, error) {
+	f := service.ZoneFilter{}
+	populateFilter(&f, attr, sliceSep)
+
+	objs, err := a.Zone.Index(f)
 	if err != nil {
 		return nil, err
 	}
