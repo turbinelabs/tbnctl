@@ -17,6 +17,7 @@
 [![GoDoc](https://godoc.org/github.com/turbinelabs/tbnctl?status.svg)](https://godoc.org/github.com/turbinelabs/tbnctl)
 [![CircleCI](https://circleci.com/gh/turbinelabs/tbnctl.svg?style=shield)](https://circleci.com/gh/turbinelabs/tbnctl)
 [![Go Report Card](https://goreportcard.com/badge/github.com/turbinelabs/tbnctl)](https://goreportcard.com/report/github.com/turbinelabs/tbnctl)
+[![codecov](https://codecov.io/gh/turbinelabs/tbnctl/branch/master/graph/badge.svg)](https://codecov.io/gh/turbinelabs/tbnctl)
 
 The tbnctl project provides a command-line interface to the Turbine Labs public API.
 
