@@ -27,7 +27,7 @@ import (
 	tbnflag "github.com/turbinelabs/nonstdlib/flag"
 )
 
-const TbnPublicVersion = "0.9.0"
+const TbnPublicVersion = "0.10.0"
 
 const clientApp = apiclient.App("github.com/turbinelabs/tbnctl")
 
