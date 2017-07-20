@@ -21,10 +21,12 @@ import (
 
 	apiclient "github.com/turbinelabs/api/client"
 	apiflag "github.com/turbinelabs/api/client/flags"
+	"github.com/turbinelabs/api/client/tokencache"
 	"github.com/turbinelabs/cli"
 	"github.com/turbinelabs/cli/command"
 	"github.com/turbinelabs/codec"
 	tbnflag "github.com/turbinelabs/nonstdlib/flag"
+	"github.com/turbinelabs/nonstdlib/log/console"
 )
 
 const TbnPublicVersion = "0.10.1"
@@ -38,6 +40,8 @@ var cmds = []func(globalConfigT) *command.Cmd{
 	cmdEdit,
 	cmdDelete,
 	cmdInitZone,
+	cmdLogin,
+	cmdLogout,
 }
 
 type globalConfigT struct {
@@ -98,8 +102,20 @@ func main() {
 	globalConfig := globalConfigT{}
 
 	gflags := tbnflag.Wrap(&goflag.FlagSet{})
-	globalConfig.apiFlags = apiflag.NewClientFromFlags(clientApp, gflags.Scope("api", "API"))
+	apiFlags := gflags.Scope("api", "API")
+	globalConfig.apiFlags = apiflag.NewClientFromFlagsWithSharedAPIConfig(
+		clientApp,
+		apiFlags,
+		apiflag.NewAPIConfigFromFlags(
+			apiFlags,
+			apiflag.APIConfigMayUseAuthToken(
+				tokencache.NewStaticPath(TokenCachePath()),
+			),
+		),
+	)
 	globalConfig.codecFlags = codec.NewFromFlags(gflags)
+
+	console.Init(gflags)
 
 	subs := []*command.Cmd{}
 	for _, mkCmd := range cmds {
