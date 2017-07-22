@@ -126,7 +126,7 @@ func (gc *loginRunner) Run(cmd *command.Cmd, args []string) command.CmdErr {
 	if password == "" {
 		// password not set by flag, get interactively
 		fmt.Printf("Password: ")
-		passBytes, err := terminal.ReadPassword(syscall.Stdin)
+		passBytes, err := terminal.ReadPassword(int(syscall.Stdin))
 		if err != nil {
 			return cmd.Errorf("Unable to read password: %v\n", err)
 		}
