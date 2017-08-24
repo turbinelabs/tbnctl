@@ -44,6 +44,11 @@ func init() {
 	}
 }
 
+var unsupportedObjectTypes = []objecttype.ObjectType{
+	objecttype.Org,
+	objecttype.AccessToken,
+}
+
 func TestNewTypelessIface(t *testing.T) {
 	for i := minObjectTypeID; i < maxObjectTypeID; i++ {
 		ctrl := gomock.NewController(assert.Tracing(t))
@@ -54,10 +59,19 @@ func TestNewTypelessIface(t *testing.T) {
 		svc := &unifiedSvc{all, admin}
 		ot, _ := objecttype.FromID(i)
 
-		if ot == objecttype.Org {
-			iface := newTypelessIface(svc, ot)
-			assert.Nil(t, iface)
-			fin()
+		unsupported := false
+
+		for _, ut := range unsupportedObjectTypes {
+			if ot == ut {
+				unsupported = true
+				iface := newTypelessIface(svc, ot)
+				assert.Nil(t, iface)
+				fin()
+				break
+			}
+		}
+
+		if unsupported {
 			continue
 		}
 
