@@ -33,7 +33,6 @@ The tbnctl project depends on these packages:
 - [cli](https://github.com/turbinelabs/cli)
 - [codec](https://github.com/turbinelabs/codec)
 - [nonstdlib](https://github.com/turbinelabs/nonstdlib)
-- [tbnproxy](https://github.com/turbinelabs/tbnproxy)
 
 The tests depend on our [test package](https://github.com/turbinelabs/test),
 and on [gomock](https://github.com/golang/mock). Some code is generated using
