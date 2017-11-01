@@ -13,6 +13,26 @@ type initZoneParseRouteTestCase struct {
 	route  route
 }
 
+func TestParseDomainsCollapses(t *testing.T) {
+	got, err := parseDomains([]string{
+		"foo:80=bar",
+		"foo:80=baz",
+		"bar:443=blegga:blagga",
+	})
+	want := []domain{
+		{name: hostPort{"foo", 80}, aliases: api.DomainAliases{"bar", "baz"}},
+		{name: hostPort{"bar", 443}, aliases: api.DomainAliases{"blegga", "blagga"}},
+	}
+	assert.Nil(t, err)
+	assert.DeepEqual(t, got, want)
+}
+
+func TestParseDomainsBadHostPort(t *testing.T) {
+	got, err := parseDomains([]string{"bogus=bar"})
+	assert.Nil(t, got)
+	assert.ErrorContains(t, err, `malformed domain/port "bogus" in domains argument "bogus=bar"`)
+}
+
 func TestParseProxiesCollapses(t *testing.T) {
 	got, err := parseProxies([]string{
 		"foo=foo1:8081",
