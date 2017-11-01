@@ -179,12 +179,12 @@ func (gc *listRunner) run(cmd *command.Cmd, args []string) error {
 	}
 
 	objs, err := svc.FilteredIndex(gc.cfg.sliceSep, argsToAttrs(args))
-	if gc.cfg.fmt == "" {
-		return gc.cfg.MkResult(objs, err)
-	}
-
 	if err != nil {
 		return err
+	}
+
+	if gc.cfg.fmt == "" {
+		gc.cfg.PrintResult(objs)
 	}
 
 	return gc.format(objs, svc.Type().Name)
@@ -197,7 +197,7 @@ func (gc *listRunner) Run(cmd *command.Cmd, args []string) command.CmdErr {
 
 	err := gc.run(cmd, args)
 	if err != nil {
-		return cmd.Error(err)
+		return gc.cfg.PrettyCmdErr(cmd, err)
 	}
 
 	return command.NoError()

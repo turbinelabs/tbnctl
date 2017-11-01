@@ -36,7 +36,7 @@ type delRunner struct {
 func (gc *delRunner) run(cmd *command.Cmd, args []string) command.CmdErr {
 	svc, err := gc.cfg.UntypedSvc(&args)
 	if err != nil {
-		return cmd.Error(err)
+		return gc.cfg.PrettyCmdErr(cmd, err)
 	}
 
 	if cerr := updateKeyed(cmd, &args, gc.cfg); cerr != command.NoError() {
@@ -45,14 +45,13 @@ func (gc *delRunner) run(cmd *command.Cmd, args []string) command.CmdErr {
 
 	obj, err := svc.Get(gc.cfg.key)
 	if err != nil {
-		return cmd.Error(err)
+		return gc.cfg.PrettyCmdErr(cmd, err)
 	}
 
-	e := svc.Delete(gc.cfg.key, svc.Checksum(obj))
-	err = gc.cfg.MkResult(obj, e)
-	if err != nil {
-		return cmd.Error(err)
+	if err := svc.Delete(gc.cfg.key, svc.Checksum(obj)); err != nil {
+		return gc.cfg.PrettyCmdErr(cmd, err)
 	}
+	gc.cfg.PrintResult(obj)
 
 	return command.NoError()
 }

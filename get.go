@@ -41,17 +41,19 @@ func (gc *getRunner) Run(cmd *command.Cmd, args []string) command.CmdErr {
 
 	svc, err := gc.cfg.UntypedSvc(&args)
 	if err != nil {
-		return command.Error(err)
+		return gc.cfg.PrettyCmdErr(cmd, err)
 	}
 
 	if cerr := updateKeyed(cmd, &args, gc.cfg); cerr != command.NoError() {
 		return cerr
 	}
 
-	err = gc.cfg.MkResult(svc.Get(gc.cfg.key))
+	obj, err := svc.Get(gc.cfg.key)
 	if err != nil {
-		return command.Error(err)
+		return gc.cfg.PrettyCmdErr(cmd, err)
 	}
+	gc.cfg.PrintResult(obj)
+
 	return command.NoError()
 }
 

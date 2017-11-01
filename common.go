@@ -17,11 +17,13 @@ limitations under the License.
 package main
 
 import (
+	"bytes"
 	"errors"
 	"fmt"
 	"os"
 	"strings"
 
+	apierror "github.com/turbinelabs/api/http/error"
 	"github.com/turbinelabs/api/objecttype"
 	"github.com/turbinelabs/cli/command"
 	"github.com/turbinelabs/codec"
@@ -157,25 +159,14 @@ func (gc *globalConfigT) UntypedSvc(args *[]string) (typelessIface, error) {
 	return svc, nil
 }
 
-// MkResult takes an object resulting from the operation and any error that
-// was encountered. The error (if not nil) or object (if err is nil) will be
-// encoded per the configured codec and printed to stdout. An error will be
-// returned only if there was a problem encoding obj or err.
-func (gc *globalConfigT) MkResult(obj interface{}, err error) error {
-	if err != nil {
-		if eerr := gc.codec.Encode(err, os.Stdout); eerr != nil {
-			return eerr
-		}
-		fmt.Println()
-		return nil
-	}
-
+// PrintResult encodes an object per the configured codec and prints to stdout.
+func (gc *globalConfigT) PrintResult(obj interface{}) {
 	if err := gc.codec.Encode(obj, os.Stdout); err != nil {
-		fmt.Println()
-		return err
+		// make a best effort, use the string representation otherwise
+		fmt.Println(obj)
 	}
-
-	return nil
+	// newline after object
+	fmt.Println()
 }
 
 // editOrStdin is a helper function for commands that need to allow the user
@@ -211,4 +202,19 @@ func editOrStdin(
 	}
 
 	return txt, nil
+}
+
+// PrettyCmdErr will marshal API client errors, and return the result of Error()
+// for other errors.
+func (gc *globalConfigT) PrettyCmdErr(cmd *command.Cmd, err error) command.CmdErr {
+	switch e := err.(type) {
+	case *apierror.Error:
+		buf := &bytes.Buffer{}
+		if err := gc.codec.Encode(e, buf); err != nil {
+			return cmd.Error(err)
+		}
+		return cmd.Error(strings.TrimSpace(buf.String()))
+	default:
+		return cmd.Error(err)
+	}
 }

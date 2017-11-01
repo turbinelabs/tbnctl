@@ -41,7 +41,12 @@ func (gc *createRunner) run(svc typelessIface) error {
 	if err != nil {
 		return err
 	}
-	return gc.cfg.MkResult(svc.Create(dest))
+	obj, err := svc.Create(dest)
+	if err != nil {
+		return err
+	}
+	gc.cfg.PrintResult(obj)
+	return nil
 }
 
 func (gc *createRunner) Run(cmd *command.Cmd, args []string) command.CmdErr {
@@ -51,12 +56,12 @@ func (gc *createRunner) Run(cmd *command.Cmd, args []string) command.CmdErr {
 
 	svc, err := gc.cfg.UntypedSvc(&args)
 	if err != nil {
-		return cmd.Error(err)
+		return gc.cfg.PrettyCmdErr(cmd, err)
 	}
 
 	err = gc.run(svc)
 	if err != nil {
-		return cmd.Error(err)
+		return gc.cfg.PrettyCmdErr(cmd, err)
 	}
 
 	return command.NoError()

@@ -70,7 +70,7 @@ func login(tc tokencache.TokenCache, password string) error {
 
 	tc.SetToken(tokencache.WrapOAuth2Token(tkn))
 	if err := tc.Save(TokenCachePath()); err != nil {
-		return fmt.Errorf("unable to save new token: %v\n", err)
+		return fmt.Errorf("unable to save new token: %v", err)
 	}
 
 	return nil
@@ -119,7 +119,7 @@ func (gc *loginRunner) Run(cmd *command.Cmd, args []string) command.CmdErr {
 	}
 
 	if len(tokenCache.Username) == 0 {
-		return cmd.Errorf("Username must not be blank")
+		return cmd.Error("Username must not be blank")
 	}
 
 	password := gc.cfg.pass
@@ -135,12 +135,12 @@ func (gc *loginRunner) Run(cmd *command.Cmd, args []string) command.CmdErr {
 	}
 
 	if len(password) == 0 {
-		return cmd.Errorf("password must not be empty")
+		return cmd.Error("password must not be empty")
 	}
 
 	err = login(populateDefaults(tokenCache), password)
 	if err != nil {
-		return cmd.Error(err)
+		return gc.cfg.PrettyCmdErr(cmd, err)
 	}
 
 	return command.NoError()

@@ -54,7 +54,12 @@ func (gc *editRunner) run(svc typelessIface) error {
 		return err
 	}
 
-	return gc.cfg.MkResult(svc.Modify(dest))
+	obj, err := svc.Modify(dest)
+	if err != nil {
+		return err
+	}
+	gc.cfg.PrintResult(obj)
+	return nil
 }
 
 func (gc *editRunner) Run(cmd *command.Cmd, args []string) command.CmdErr {
@@ -64,7 +69,7 @@ func (gc *editRunner) Run(cmd *command.Cmd, args []string) command.CmdErr {
 
 	svc, err := gc.cfg.UntypedSvc(&args)
 	if err != nil {
-		return cmd.Error(err)
+		return gc.cfg.PrettyCmdErr(cmd, err)
 	}
 
 	if cerr := updateKeyed(cmd, &args, gc.cfg); cerr != command.NoError() {
@@ -73,7 +78,7 @@ func (gc *editRunner) Run(cmd *command.Cmd, args []string) command.CmdErr {
 
 	err = gc.run(svc)
 	if err != nil {
-		return cmd.Error(err)
+		return gc.cfg.PrettyCmdErr(cmd, err)
 	}
 
 	return command.NoError()

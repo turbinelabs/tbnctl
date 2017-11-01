@@ -43,21 +43,20 @@ func (kr *keyRunner) Run(cmd *command.Cmd, args []string) command.CmdErr {
 
 	svc := kr.cfg.apiClient.Admin.AccessToken()
 
+	var (
+		res interface{}
+		err error
+	)
+
 	switch args[0] {
 	case "list":
-		err := kr.cfg.MkResult(svc.Index())
-		if err != nil {
-			return cmd.Error(err)
-		}
+		res, err = svc.Index()
 
 	case "add":
 		if len(args) < 2 {
 			return cmd.BadInput("description should be provided summarizing intended token use")
 		}
-		err := kr.cfg.MkResult(svc.Create(api.AccessToken{Description: args[1]}))
-		if err != nil {
-			return cmd.Error(err)
-		}
+		res, err = svc.Create(api.AccessToken{Description: args[1]})
 
 	case "remove":
 		if len(args) < 2 {
@@ -67,21 +66,22 @@ func (kr *keyRunner) Run(cmd *command.Cmd, args []string) command.CmdErr {
 		key := api.AccessTokenKey(args[1])
 		curs, err := svc.Index(service.AccessTokenFilter{AccessTokenKey: key})
 		if err != nil {
-			return cmd.Error(err)
+			return kr.cfg.PrettyCmdErr(cmd, err)
 		} else if len(curs) != 1 {
 			return cmd.Errorf("unable to locate access token %v", args[1])
 		}
 
 		cur := curs[0]
-		err = kr.cfg.MkResult(nil, svc.Delete(key, cur.Checksum))
-
-		if err != nil {
-			return cmd.Error(err)
-		}
+		err = svc.Delete(key, cur.Checksum)
 
 	default:
 		return cmd.BadInput(fmt.Sprintf("%q is not a valid access-tokens command", args[0]))
 	}
+
+	if err != nil {
+		return kr.cfg.PrettyCmdErr(cmd, err)
+	}
+	kr.cfg.PrintResult(res)
 
 	return command.NoError()
 }

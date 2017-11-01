@@ -89,6 +89,7 @@ func cmdInitZone(globalConfig globalConfigT) *command.Cmd {
 	}
 
 	r := &initZoneRunner{
+		cfg:        &globalConfig,
 		apiFlags:   globalConfig.apiFlags,
 		domainStrs: tbnflag.NewStrings(),
 		routesStrs: tbnflag.NewStrings(),
@@ -110,10 +111,11 @@ func cmdInitZone(globalConfig globalConfigT) *command.Cmd {
 }
 
 type initZoneRunner struct {
+	cfg        *globalConfigT
+	apiFlags   apiflags.ClientFromFlags
 	domainStrs tbnflag.Strings
 	routesStrs tbnflag.Strings
 	proxyStrs  tbnflag.Strings
-	apiFlags   apiflags.ClientFromFlags
 	replace    bool
 }
 
@@ -187,16 +189,16 @@ func (r *initZoneRunner) Run(cmd *command.Cmd, args []string) command.CmdErr {
 
 	svc, err := r.apiFlags.Make()
 	if err != nil {
-		return cmd.Error(err)
+		return r.cfg.PrettyCmdErr(cmd, err)
 	}
 
 	zkey, err := addZone(svc.Zone(), zoneName)
 	if err != nil {
-		return cmd.Error(err)
+		return r.cfg.PrettyCmdErr(cmd, err)
 	}
 
 	if err := addObjects(svc, zkey, domains, routes, proxies, r.replace); err != nil {
-		return cmd.Error(err)
+		return r.cfg.PrettyCmdErr(cmd, err)
 	}
 
 	return command.NoError()

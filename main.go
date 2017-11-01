@@ -59,6 +59,7 @@ func (gc *globalConfigT) Prepare(cmd *command.Cmd) command.CmdErr {
 	if err := gc.Validate(); err != nil {
 		return cmd.BadInput(err)
 	}
+
 	if err := gc.Make(); err != nil {
 		return cmd.Error(err)
 	}
