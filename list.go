@@ -185,6 +185,7 @@ func (gc *listRunner) run(cmd *command.Cmd, args []string) error {
 
 	if gc.cfg.fmt == "" {
 		gc.cfg.PrintResult(objs)
+		return nil
 	}
 
 	return gc.format(objs, svc.Type().Name)
