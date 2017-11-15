@@ -23,7 +23,8 @@ import (
 type delCfg struct {
 	*globalConfigT
 
-	key string
+	key  string
+	deep bool
 }
 
 func (dc *delCfg) Key() string         { return dc.key }
@@ -48,7 +49,13 @@ func (gc *delRunner) run(cmd *command.Cmd, args []string) command.CmdErr {
 		return gc.cfg.PrettyCmdErr(cmd, err)
 	}
 
-	if err := svc.Delete(gc.cfg.key, svc.Checksum(obj)); err != nil {
+	if gc.cfg.deep {
+		err = svc.DeepDelete(gc.cfg.key, svc.Checksum(obj), gc.cfg.apiClient)
+	} else {
+		err = svc.Delete(gc.cfg.key, svc.Checksum(obj))
+	}
+
+	if err != nil {
 		return gc.cfg.PrettyCmdErr(cmd, err)
 	}
 	gc.cfg.PrintResult(obj)
@@ -81,6 +88,13 @@ func cmdDelete(cfg globalConfigT) *command.Cmd {
 		"key",
 		"",
 		"[deprecated] key of the object to delete",
+	)
+
+	cmd.Flags.BoolVar(
+		&runner.cfg.deep,
+		"deep",
+		false,
+		"if true, delete the entire object graph below the specified object",
 	)
 
 	return cmd

@@ -57,6 +57,7 @@ type typelessIface interface {
 	Get(string) (interface{}, error)
 	Modify(interface{}) (interface{}, error)
 	Delete(string, api.Checksum) error
+	DeepDelete(string, api.Checksum, *unifiedSvc) error
 	Index() ([]interface{}, error)
 	FilteredIndex(string, map[string]string) ([]interface{}, error)
 	IndexZeroFilter() interface{}
