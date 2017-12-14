@@ -40,6 +40,8 @@ var cmds = []func(globalConfigT) *command.Cmd{
 	cmdEdit,
 	cmdDelete,
 	cmdInitZone,
+	cmdExportZone,
+	cmdImportZone,
 	cmdTokens,
 	cmdLogin,
 	cmdLogout,
