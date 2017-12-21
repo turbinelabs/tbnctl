@@ -29,7 +29,7 @@ import (
 	"github.com/turbinelabs/nonstdlib/log/console"
 )
 
-const TbnPublicVersion = "0.14.1"
+const TbnPublicVersion = "0.14.2"
 
 const clientApp = apiclient.App("github.com/turbinelabs/tbnctl")
 
