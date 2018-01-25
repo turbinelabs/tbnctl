@@ -1,0 +1,12 @@
+ignored = [
+  "github.com/turbinelabs/api*",
+  "github.com/turbinelabs/cli*",
+  "github.com/turbinelabs/codec*",
+  "github.com/turbinelabs/nonstdlib*",
+  "github.com/turbinelabs/test*",
+  "github.com/golang/mock*"
+]
+
+[[constraint]]
+  name = "golang.org/x/crypto"
+  revision = "dd85ac7e6a88fc6ca420478e934de5f1a42dd3c6"
