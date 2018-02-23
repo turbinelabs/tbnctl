@@ -12,7 +12,7 @@ import (
 	"github.com/turbinelabs/api/service"
 	"github.com/turbinelabs/codec"
 ) /*
-Copyright 2017 Turbine Labs, Inc.
+Copyright 2018 Turbine Labs, Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
