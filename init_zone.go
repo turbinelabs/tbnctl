@@ -150,6 +150,10 @@ func (r route) String() string {
 }
 
 func (r *initZoneRunner) Run(cmd *command.Cmd, args []string) command.CmdErr {
+	if err := r.cfg.Prepare(cmd); err != command.NoError() {
+		return err
+	}
+
 	if len(args) != 1 {
 		return cmd.BadInput("requires exactly one argument")
 	}
