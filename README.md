@@ -1,4 +1,3 @@
-
 [//]: # ( Copyright 2018 Turbine Labs, Inc.                                   )
 [//]: # ( you may not use this file except in compliance with the License.    )
 [//]: # ( You may obtain a copy of the License at                             )
@@ -36,7 +35,7 @@ The tbnctl project depends on these packages:
 
 The tests depend on our [test package](https://github.com/turbinelabs/test),
 and on [gomock](https://github.com/golang/mock). Some code is generated using
-[genny](http://github.com/falun/genny).
+[codegen](http://github.com/turbinelabs/tools/codegen).
 
 It should always be safe to use HEAD of all master branches of Turbine Labs
 open source projects together, or to vendor them with the same git tag.
@@ -62,12 +61,12 @@ go test github.com/turbinelabs/tbnctl/...
 ## Generated code
 
 Some code is generated using `go generate` and
-[genny](http://github.com/falun/genny). If you need to modify the generated
-code, modify [`adaptor.genny`](adaptor.genny), then:
+[codegen](http://github.com/turbinelabs/tools/codegen). If you need to modify the generated
+code, modify [`adaptor.template`](adaptor.template), then:
 
 ```
-go get -u github.com/falun/genny
-go install github.com/falun/genny
+go get -u github.com/turbinelabs/tools/codegen
+go install github.com/turbinelabs/tools/codegen
 go generate github.com/turbinelabs/tbnctl
 ```
 
@@ -120,4 +119,3 @@ things we might someday add include:
 - parity with the web app for our the release workflow
 - access to the Stats API
 - better defaults when creating more complex objects (e.g. Routes, SharedRules)
-

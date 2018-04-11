@@ -462,7 +462,7 @@ func (a routeAdapter) DeepDelete(k string, cs api.Checksum, svc *unifiedSvc) err
 	return d.execute()
 }
 
-func (a sharedrulesAdapter) DeepDelete(k string, cs api.Checksum, svc *unifiedSvc) error {
+func (a sharedRulesAdapter) DeepDelete(k string, cs api.Checksum, svc *unifiedSvc) error {
 	d := newDeleter(svc)
 	if err := d.addSharedRulesKey(api.SharedRulesKey(k)); err != nil {
 		return err

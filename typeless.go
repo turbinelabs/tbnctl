@@ -38,13 +38,13 @@ type unifiedSvc struct {
 	service.Admin
 }
 
-//go:generate genny -in adapter.genny -out gen_user.go -pkg $GOPACKAGE gen "__type__=user __Type__=User"
-//go:generate genny -in adapter.genny -out gen_zone.go -pkg $GOPACKAGE gen "__type__=zone __Type__=Zone"
-//go:generate genny -in adapter.genny -out gen_proxy.go -pkg $GOPACKAGE gen "__type__=proxy __Type__=Proxy"
-//go:generate genny -in adapter.genny -out gen_domain.go -pkg $GOPACKAGE gen "__type__=domain __Type__=Domain"
-//go:generate genny -in adapter.genny -out gen_route.go -pkg $GOPACKAGE gen "__type__=route __Type__=Route"
-//go:generate genny -in adapter.genny -out gen_sharedrules.go -pkg $GOPACKAGE gen "__type__=sharedrules __Type__=SharedRules"
-//go:generate genny -in adapter.genny -out gen_cluster.go -pkg $GOPACKAGE gen "__type__=cluster __Type__=Cluster"
+//go:generate codegen --output=gen_user.go adapter.template Type=github.com/turbinelabs/api.User
+//go:generate codegen --output=gen_zone.go adapter.template Type=github.com/turbinelabs/api.Zone
+//go:generate codegen --output=gen_proxy.go adapter.template Type=github.com/turbinelabs/api.Proxy
+//go:generate codegen --output=gen_domain.go adapter.template Type=github.com/turbinelabs/api.Domain
+//go:generate codegen --output=gen_route.go adapter.template Type=github.com/turbinelabs/api.Route
+//go:generate codegen --output=gen_sharedrules.go adapter.template Type=github.com/turbinelabs/api.SharedRules
+//go:generate codegen --output=gen_cluster.go adapter.template Type=github.com/turbinelabs/api.Cluster
 
 type typelessIface interface {
 	Type() objecttype.ObjectType
@@ -72,7 +72,7 @@ func newTypelessIface(svc *unifiedSvc, ot objecttype.ObjectType) typelessIface {
 	case objecttype.Domain:
 		return domainAdapter{svc.All.Domain()}
 	case objecttype.SharedRules:
-		return sharedrulesAdapter{svc.All.SharedRules()}
+		return sharedRulesAdapter{svc.All.SharedRules()}
 	case objecttype.Route:
 		return routeAdapter{svc.All.Route()}
 	case objecttype.Cluster:
