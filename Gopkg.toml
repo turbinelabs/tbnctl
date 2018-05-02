@@ -7,6 +7,10 @@ ignored = [
   "github.com/golang/mock*"
 ]
 
+[prune]
+  go-tests = true
+  unused-packages = true
+
 [[constraint]]
   name = "golang.org/x/crypto"
   revision = "dd85ac7e6a88fc6ca420478e934de5f1a42dd3c6"
