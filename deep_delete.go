@@ -42,6 +42,7 @@ type deleter struct {
 	srs       map[api.SharedRulesKey]api.SharedRules
 	proxies   map[api.ProxyKey]api.Proxy
 	proxyMods map[api.ProxyKey]*proxyMod
+	listeners map[api.ListenerKey]api.Listener
 
 	domainsForReport map[api.DomainKey]api.Domain
 }
@@ -55,6 +56,7 @@ func newDeleter(svc *unifiedSvc) *deleter {
 		srs:              make(map[api.SharedRulesKey]api.SharedRules),
 		proxies:          make(map[api.ProxyKey]api.Proxy),
 		proxyMods:        make(map[api.ProxyKey]*proxyMod),
+		listeners:        make(map[api.ListenerKey]api.Listener),
 		domainsForReport: make(map[api.DomainKey]api.Domain),
 	}
 }
@@ -467,6 +469,12 @@ func (a domainAdapter) DeepDelete(k string, cs api.Checksum, svc *unifiedSvc) er
 
 func (a proxyAdapter) DeepDelete(k string, cs api.Checksum, svc *unifiedSvc) error {
 	console.Error().Println("warning: --deep ignored for proxy delete")
+	return a.Delete(k, cs)
+}
+
+// per #5630 we should figure out what to do with listeners in a deep delete
+func (a listenerAdapter) DeepDelete(k string, cs api.Checksum, svc *unifiedSvc) error {
+	console.Error().Println("warning: --deep ignored for listener delete")
 	return a.Delete(k, cs)
 }
 

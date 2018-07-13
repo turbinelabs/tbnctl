@@ -95,6 +95,10 @@ func TestNewTypelessIface(t *testing.T) {
 			m := service.NewMockProxy(ctrl)
 			all.EXPECT().Proxy().Return(m)
 			want = m
+		case objecttype.Listener:
+			m := service.NewMockListener(ctrl)
+			all.EXPECT().Listener().Return(m)
+			want = m
 		case objecttype.Domain:
 			m := service.NewMockDomain(ctrl)
 			all.EXPECT().Domain().Return(m)

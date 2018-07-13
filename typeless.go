@@ -41,6 +41,7 @@ type unifiedSvc struct {
 //go:generate codegen --output=gen_user.go adapter.template Type=github.com/turbinelabs/api.User
 //go:generate codegen --output=gen_zone.go adapter.template Type=github.com/turbinelabs/api.Zone
 //go:generate codegen --output=gen_proxy.go adapter.template Type=github.com/turbinelabs/api.Proxy
+//go:generate codegen --output=gen_listener.go adapter.template Type=github.com/turbinelabs/api.Listener
 //go:generate codegen --output=gen_domain.go adapter.template Type=github.com/turbinelabs/api.Domain
 //go:generate codegen --output=gen_route.go adapter.template Type=github.com/turbinelabs/api.Route
 //go:generate codegen --output=gen_sharedrules.go adapter.template Type=github.com/turbinelabs/api.SharedRules
@@ -69,6 +70,8 @@ func newTypelessIface(svc *unifiedSvc, ot objecttype.ObjectType) typelessIface {
 		return zoneAdapter{svc.All.Zone()}
 	case objecttype.Proxy:
 		return proxyAdapter{svc.All.Proxy()}
+	case objecttype.Listener:
+		return listenerAdapter{svc.All.Listener()}
 	case objecttype.Domain:
 		return domainAdapter{svc.All.Domain()}
 	case objecttype.SharedRules:
