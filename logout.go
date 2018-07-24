@@ -19,6 +19,7 @@ package main
 import (
 	"github.com/turbinelabs/api/client/tokencache"
 	"github.com/turbinelabs/cli/command"
+	"github.com/turbinelabs/nonstdlib/log/console"
 )
 
 type logoutRunner struct{}
@@ -37,6 +38,8 @@ func (gc *logoutRunner) Run(cmd *command.Cmd, args []string) command.CmdErr {
 	if err := tokenCache.Save(TokenCachePath()); err != nil {
 		return cmd.Errorf("Unable to invalidate cached auth token")
 	}
+
+	console.Info().Printf("logged out %q", tokenCache.Username)
 
 	return command.NoError()
 }

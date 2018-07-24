@@ -30,6 +30,7 @@ import (
 	"github.com/turbinelabs/api/client/tokencache"
 	"github.com/turbinelabs/cli/command"
 	"github.com/turbinelabs/nonstdlib/flag/usage"
+	"github.com/turbinelabs/nonstdlib/log/console"
 )
 
 // TokenCachePath returns the path that the auth token should be cached at.
@@ -143,6 +144,7 @@ func (gc *loginRunner) Run(cmd *command.Cmd, args []string) command.CmdErr {
 		return gc.cfg.PrettyCmdErr(cmd, err)
 	}
 
+	console.Info().Printf("logged in %q", tokenCache.Username)
 	return command.NoError()
 }
 
