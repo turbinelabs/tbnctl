@@ -23,7 +23,7 @@ The tbnctl project provides a command-line interface to the Turbine Labs public 
 
 ## Requirements
 
-- Go 1.10.1 or later (previous versions may work, but we don't build or test against them)
+- Go 1.10.3 or later (previous versions may work, but we don't build or test against them)
 
 ## Dependencies
 
